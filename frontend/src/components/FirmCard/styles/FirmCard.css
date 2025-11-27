@@ -1,0 +1,297 @@
+/* Enlace contenedor para que la card completa sea clicable */
+.firm-card-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Tarjeta minimalista y algo más baja */
+.firm-card {
+  height: 100%;
+  min-height: 230px;
+  /* 🔻 antes 300px */
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 18px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.firm-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+  border-color: var(--primary-main);
+}
+
+/* Tag activo en rojo */
+.firm-tag-active {
+  background-color: #ffebee !important;
+  color: #d32f2f !important;
+  border: 1px solid #d32f2f !important;
+}
+
+/* Línea superior sutil */
+.firm-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--primary-main);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transition-base);
+}
+
+.firm-card:hover::before {
+  transform: scaleX(1);
+}
+
+/* HEADER -------------------------------------------------- */
+.firm-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+  z-index: 2;
+}
+
+.firm-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Botón Ranking arriba a la derecha */
+.firm-header-right {
+  display: flex;
+  align-items: flex-start;
+}
+
+.firm-ranking-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 999px;
+  border: 1px solid var(--primary-main);
+  background: #fff5f5;
+  color: var(--primary-main);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.firm-ranking-btn:hover {
+  background: var(--primary-main);
+  color: #ffffff;
+}
+
+.firm-ranking-star {
+  font-size: 0.9rem;
+}
+
+/* Nombre de la firma */
+.firm-name {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.firm-header-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+/* Badges */
+.firm-rank,
+.firm-relevance {
+  font-size: 0.78rem;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  border: none;
+  transition: all var(--transition-fast);
+}
+
+.firm-rank {
+  background: #f3f4f6;
+  color: var(--text-primary);
+}
+
+.firm-relevance {
+  background: var(--primary-light);
+  color: var(--primary-main);
+}
+
+/* META ---------------------------------------------------- */
+.firm-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.firm-country,
+.firm-area {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* TAGS (ya en horizontal) --------------------------------- */
+.firm-tags {
+  margin-top: 2px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  position: relative;
+  z-index: 2;
+}
+
+.firm-tag {
+  font-size: 0.78rem;
+  background: #f8f8f8;
+  color: var(--text-secondary);
+  border-radius: 999px;
+  padding: 5px 9px;
+  border: 1px solid var(--border-light);
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.firm-tag:hover {
+  background: var(--primary-light);
+  color: var(--primary-main);
+  border-color: var(--primary-main);
+}
+
+/* FOOTER: botón Agregar ----------------------------------- */
+.firm-card-footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.firm-add-btn {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 999px;
+  border: 1px solid var(--text-secondary);
+  background: #ffffff;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.firm-add-btn:hover {
+  background: var(--primary-main);
+  color: #ffffff;
+  border-color: var(--primary-main);
+}
+
+/* Indicador de coincidencia con búsqueda */
+.firm-match-indicator {
+  margin-top: 4px;
+  padding: 5px 9px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #b91c1c;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  width: fit-content;
+}
+
+/* Animación entrada */
+.firm-card {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* RESPONSIVE ---------------------------------------------- */
+@media (max-width: 768px) {
+  .firm-card {
+    padding: 16px;
+    gap: 10px;
+  }
+
+  .firm-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .firm-header-right {
+    align-self: flex-end;
+  }
+
+  .firm-name {
+    font-size: 1rem;
+  }
+
+  .firm-meta {
+    font-size: 0.78rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .firm-card {
+    padding: 14px;
+  }
+
+  .firm-header-badges {
+    flex-wrap: wrap;
+  }
+
+  .firm-ranking-btn {
+    font-size: 0.75rem;
+    padding: 5px 9px;
+  }
+
+  .firm-tag {
+    font-size: 0.74rem;
+  }
+}

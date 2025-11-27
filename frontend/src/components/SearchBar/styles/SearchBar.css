@@ -1,0 +1,114 @@
+/* Rediseño minimalista con paleta de colores actualizada */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 720px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 12px 16px;
+  border: 1.5px solid var(--border-light);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base);
+  position: relative;
+}
+
+.search-bar:focus-within {
+  border-color: var(--primary-main);
+  box-shadow: var(--shadow-lg), 0 0 0 3px rgba(235, 75, 110, 0.1);
+  transform: translateY(-2px);
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 400;
+  padding: 8px 0;
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Botón de búsqueda minimalista */
+.search-button {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--primary-main);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(235, 75, 110, 0.25);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.search-button:hover:not(:disabled) {
+  background: #d42a52;
+  box-shadow: 0 4px 16px rgba(235, 75, 110, 0.35);
+  transform: translateY(-1px);
+}
+
+.search-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.search-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .search-bar {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+
+  .search-input {
+    font-size: 0.95rem;
+  }
+
+  .search-button {
+    padding: 8px 18px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .search-bar {
+    flex-direction: column;
+    border-radius: 10px;
+    padding: 14px;
+  }
+
+  .search-input {
+    width: 100%;
+    text-align: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: 8px;
+  }
+
+  .search-button {
+    width: 100%;
+    padding: 12px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-bar {
+    padding: 12px;
+  }
+
+  .search-input {
+    font-size: 0.9rem;
+  }
+}
