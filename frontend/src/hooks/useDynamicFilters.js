@@ -34,20 +34,29 @@ export default function useDynamicFilters() {
 
         return Array.from(new Set(subset));
     }, [selectedRegion, filterCountries, countryRegionMap]);
-
-    const applyFilters = (list) => {
-        let filtered = list;
+    const applyFilters = (list = []) => {
+        // ✅ Siempre trabajamos con un array
+        let filtered = Array.isArray(list) ? list : [];
 
         if (selectedRegion) {
-            filtered = filtered.filter((f) => (f.region || "").trim() === selectedRegion);
+            filtered = filtered.filter(
+                (item) =>
+                    (item.region || "").toString().trim().toLowerCase() ===
+                    selectedRegion.toString().trim().toLowerCase()
+            );
         }
 
         if (selectedCountry) {
-            filtered = filtered.filter((f) => (f.country || "").trim() === selectedCountry);
+            filtered = filtered.filter(
+                (item) =>
+                    (item.country || "").toString().trim().toLowerCase() ===
+                    selectedCountry.toString().trim().toLowerCase()
+            );
         }
 
         return filtered;
     };
+
 
     return {
         filterCountries,

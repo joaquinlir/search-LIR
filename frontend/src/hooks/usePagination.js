@@ -1,13 +1,16 @@
 // src/hooks/usePagination.js
 import { useState } from "react";
 
-export default function usePagination(items, perPage = 6) {
+export default function usePagination(items = [], perPage = 6) {
+    // Nos aseguramos de trabajar siempre con un array
+    const safeItems = Array.isArray(items) ? items : [];
+
     const [page, setPage] = useState(0);
 
-    const totalPages = Math.max(1, Math.ceil(items.length / perPage));
+    const totalPages = Math.max(1, Math.ceil(safeItems.length / perPage));
     const currentPage = Math.min(page, totalPages - 1);
 
-    const visibleItems = items.slice(
+    const visibleItems = safeItems.slice(
         currentPage * perPage,
         currentPage * perPage + perPage
     );

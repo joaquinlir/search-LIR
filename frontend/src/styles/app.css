@@ -52,7 +52,7 @@
 
 /* Contenedor principal */
 .main-content {
-  max-width: 1200px;
+  max-width: 1600px;
   margin: -30px auto 40px;
   padding: 0 16px 40px;
   width: 100%;
@@ -66,6 +66,7 @@
   gap: 24px;
 }
 
+/* Columna central con filtros y resultados */
 .content-main-column {
   flex: 1;
   display: flex;
@@ -73,9 +74,84 @@
   gap: 16px;
 }
 
+.filters-section {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-xs);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filters-section h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filters-row select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  position: relative;
+  padding: 8px 32px 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-light);
+  background-color: #f8fafc;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  outline: none;
+  min-width: 180px;
+  box-shadow: 0 2px 6px rgba(2, 18, 34, 0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease,
+    background-color 0.15s ease, transform 0.1s ease;
+  background-image: linear-gradient(45deg, transparent 50%, #94a3b8 50%),
+    linear-gradient(135deg, #94a3b8 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.filters-row select:hover {
+  background-color: #ffffff;
+  border-color: var(--primary-main);
+  box-shadow: 0 4px 10px rgba(2, 18, 34, 0.08);
+  transform: translateY(-1px);
+}
+
+.filters-row select:focus {
+  border-color: var(--primary-main);
+  box-shadow: 0 0 0 2px rgba(235, 75, 110, 0.18);
+}
+
+/* Placeholder (opción 'Todas las regiones / Todos los países') */
+.filters-row select option[value=""] {
+  color: var(--text-muted);
+}
+
+/* Columnas laterales reutilizables */
 .sidebar-column {
-  flex: 0 0 auto;
-  min-width: 240px;
+  flex: 0 0 260px;
+}
+
+/* Específicas para izquierda y derecha (por si luego quieres estilos distintos) */
+.sidebar-left {
+  order: -1;
+  /* En mobile se mostrará antes del contenido */
+}
+
+.sidebar-right {
+  order: 1;
 }
 
 .sidebar-card {
@@ -166,6 +242,22 @@
   padding: 24px;
 }
 
+/* Header de tags rápidos: título + paginación */
+.quick-tags-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* título izq, paginación der */
+  gap: 8px;
+  margin-bottom: 8px;
+  padding-right: 6px;
+  /* para que el paginador no quede pegado al borde */
+}
+
+.quick-tags-header h3 {
+  margin: 0;
+}
+
 /* Tags activos */
 .active-tags-container {
   margin-top: 12px;
@@ -206,6 +298,154 @@
 
 .tag-remove:hover {
   opacity: 0.7;
+}
+
+/* ===== NUEVO: paginaciones unificadas (tags rápidos + firmas por país) ===== */
+
+/* Píldora de paginación (misma para ambos sidebars) */
+.country-sidebar-pagination,
+.quick-tags-pagination {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  background: #f7f7f7;
+  border-radius: 999px;
+  padding: 2px 10px;
+  border: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+/* Botones de flechas (compartidos) */
+.country-sidebar-page-btn,
+.quick-tags-page-btn {
+  border: none;
+  background: transparent;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0;
+}
+
+.country-sidebar-page-btn:hover:not(:disabled),
+.quick-tags-page-btn:hover:not(:disabled) {
+  background: #ffffff;
+  box-shadow: 0 0 0 1px var(--primary-main);
+}
+
+.country-sidebar-page-btn:disabled,
+.quick-tags-page-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* Texto "1 / N" (compartido) */
+.country-sidebar-page-indicator,
+.quick-tags-page-indicator {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ===== FIN sección paginaciones ===== */
+
+/*nuevoooo sitio 11*/
+
+.country-sidebar-header {
+  display: flex;
+  align-items: center;
+  /* centra verticalmente título y paginación */
+  justify-content: space-between;
+  /* título a la izquierda, paginación a la derecha */
+  gap: 8px;
+  margin-bottom: 10px;
+  /* separa el header de las cards */
+}
+
+.country-sidebar-header .country-sidebar-card-title {
+  margin: 0;
+}
+
+/* Cards de países / firmas en sidebar derecha */
+.country-sidebar-card-title {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+}
+
+.country-sidebar-subtitle {
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.country-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.country-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-xs);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast),
+    border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.country-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+  border-color: var(--primary-main);
+  background-color: var(--primary-lighter);
+}
+
+.country-card-country {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.country-card-area {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #707070;
+  white-space: nowrap;
+  /* no saltar de línea */
+  overflow: hidden;
+  /* ocultar el exceso */
+  text-overflow: ellipsis;
+  /* mostrar "..." al final */
+}
+
+.country-card-firm {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #000000;
+  white-space: nowrap;
+  /* no saltar de línea */
+  overflow: hidden;
+  /* ocultar el exceso */
+  text-overflow: ellipsis;
+  /* mostrar "..." al final */
+}
+
+/* Por si no hay datos en el sidebar derecho */
+.country-sidebar-empty {
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }
 
 /* Layout responsivo */
@@ -249,11 +489,6 @@
     font-size: 0.95rem;
   }
 
-  .main-content {
-    margin-top: -24px;
-    padding: 0 12px 32px;
-  }
-
   .results-grid {
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 12px;
@@ -272,7 +507,6 @@
 
   .hero-title {
     font-size: 1.5rem;
-
   }
 
   .hero-subtitle {
@@ -300,5 +534,68 @@
 
   .main-content {
     padding: 0 12px 24px;
+  }
+}
+
+/*nuevoooo sitio*/
+
+@media (min-width: 900px) {
+  .content-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr 260px;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .sidebar-left,
+  .sidebar-right {
+    position: sticky;
+    top: 16px;
+  }
+
+  .content-main-column {
+    order: 0;
+  }
+}
+
+/* En pantallas pequeñas se apilan (izq → centro → dcha) */
+@media (max-width: 900px) {
+  .content-layout {
+    flex-direction: column;
+  }
+
+  .sidebar-column {
+    flex: 0 0 auto;
+    min-width: auto;
+  }
+}
+
+/* Orden en pantallas pequeñas: primero resultados, luego tags, luego firmas por país */
+@media (max-width: 900px) {
+  .content-main-column {
+    order: 1;
+  }
+
+  .sidebar-left {
+    order: 2;
+  }
+
+  .sidebar-right {
+    order: 3;
+  }
+}
+
+/* Responsive: que no se vean aplastados en pantallas pequeñas */
+@media (max-width: 768px) {
+  .filters-section {
+    padding: 12px 12px;
+  }
+
+  .filters-row {
+    flex-direction: column;
+  }
+
+  .filters-row select {
+    width: 100%;
   }
 }

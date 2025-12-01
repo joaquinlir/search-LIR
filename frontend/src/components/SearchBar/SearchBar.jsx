@@ -4,15 +4,24 @@ import "./styles/SearchBar.css";
 
 const SearchBar = ({ value, onSearch, onTyping }) => {
   const [localValue, setLocalValue] = useState(value || "");
+  const [error, setError] = useState(""); // ⬅ NUEVO: estado de error
 
-  // Sincronizar si desde App algún día cambias value
+  // Sincronizar si desde App cambian value
   useEffect(() => {
     setLocalValue(value || "");
   }, [value]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!localValue.trim()) return;
+
+    if (!localValue.trim()) {
+      setError("Por favor escribe una palabra antes de buscar");
+
+      // borrar error automático después de 2.2s
+      setTimeout(() => setError(""), 3500);
+      return;
+    }
+
     onSearch(localValue);
   };
 
@@ -23,18 +32,24 @@ const SearchBar = ({ value, onSearch, onTyping }) => {
   };
 
   return (
-    <form className="search-bar" onSubmit={handleSubmit}>
-      <input
-        className="search-input"
-        type="text"
-        placeholder="Busca conceptos como 'energía', 'tecnología', 'ESG'..."
-        value={localValue}
-        onChange={handleChange}
-      />
-      <button className="search-button" type="submit">
-        Buscar
-      </button>
-    </form>
+    <>
+      <form className="search-bar" onSubmit={handleSubmit}>
+        <input
+          className="search-input"
+          type="text"
+          placeholder="Busca conceptos como 'energía', 'tecnología', 'ESG'..."
+          value={localValue}
+          onChange={handleChange}
+        />
+
+        <button className="search-button" type="submit">
+          Buscar
+        </button>
+      </form>
+
+      {/* ⬅ NUEVO: Mensaje de error elegante */}
+      {error && <p className="search-error">{error}</p>}
+    </>
   );
 };
 

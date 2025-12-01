@@ -24,6 +24,7 @@ const FirmCard = ({ firm, activeTags = [], highlightMatch }) => {
 
   const { label: rankLabel, className: rankClass } = getRankInfo(ranked);
 
+
   const navigate = useNavigate();
 
   function cleanFirmName(name) {
@@ -64,74 +65,88 @@ const FirmCard = ({ firm, activeTags = [], highlightMatch }) => {
     e.stopPropagation();
 
   }
+
+  // Dentro de FirmCard.jsx
+  const handleAgregar = () => {
+    window.dispatchEvent(
+      new CustomEvent("saved-firm:add", {
+        detail: {
+          id: firm.id,          // debe ser único
+          firm: firm.firm,      // nombre de la firma
+          area: firm.area,      // área principal
+          ranking: firm.ranked,   // o como se llame en tu dato
+        },
+      })
+    );
+  };
+
   return (
-    <Link to={`/firm/${firm.id || ""}`}> {/* ✅ SAFE */}
-      <article className="firm-card">
-        {highlightMatch && (
-          <div className="firm-match-indicator">
-            Esta firma habla de tu búsqueda
-          </div>
-        )}
-        <header className="firm-card-header">
-          <div className="firm-header-left">
-            <h3 className="firm-name">{name || "Firma sin nombre"}</h3>
-            <div className="firm-header-badges">
-              <span className={`firm-rank ${rankClass}`}>{rankLabel}</span>
-              {typeof relevance === "number" && (
-                <span className="firm-relevance">
-                  relevancia {relevance}%
-                </span>
-              )}
-            </div>
-          </div>
 
-          {/* ⭐ Botón Ranking arriba derecha */}
-          <div className="firm-header-right">
-            <button
-              type="button"
-              className="firm-ranking-btn"
-              onClick={handleRankingClick}
-            >
-              <span className="firm-ranking-star">⭐</span>
-              Ver en LM
-            </button>
+    <article className="firm-card">
+      {highlightMatch && (
+        <div className="firm-match-indicator">
+          Esta firma habla de tu búsqueda
+        </div>
+      )}
+      <header className="firm-card-header">
+        <div className="firm-header-left">
+          <h3 className="firm-name">{name || "Firma sin nombre"}</h3>
+          <div className="firm-header-badges">
+            <span className={`firm-rank ${rankClass}`}>{rankLabel}</span>
+            {typeof relevance === "number" && (
+              <span className="firm-relevance">
+                relevancia {relevance}%
+              </span>
+            )}
           </div>
-        </header>
-
-        <div className="firm-meta">
-          <span className="firm-country">{country || "País no especificado"}</span>
-          {area && <span className="firm-area">{area}</span>}
         </div>
 
-        {tags && tags.length > 0 && (
-          <div className="firm-tags">
-            {tags.slice(0, 8).map((t) => {
-              const isActive = activeTags.includes(t.toLowerCase());
-              return (
-                <span
-                  key={t}
-                  className={`firm-tag ${isActive ? "firm-tag-active" : ""}`}
-                >
-                  {t}
-                </span>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Botón Agregar abajo derecha */}
-        <div className="firm-card-footer">
+        {/* ⭐ Botón Ranking arriba derecha */}
+        <div className="firm-header-right">
           <button
             type="button"
-            className="firm-add-btn"
-            onClick={handleAddClick}
+            className="firm-ranking-btn"
+            onClick={handleRankingClick}
           >
-            Agregar +
+            <span className="firm-ranking-star">⭐</span>
+            Ver en LM
           </button>
         </div>
+      </header>
 
-      </article>
-    </Link>
+      <div className="firm-meta">
+        <span className="firm-country">{country || "País no especificado"}</span>
+        {area && <span className="firm-area">{area}</span>}
+      </div>
+
+      {tags && tags.length > 0 && (
+        <div className="firm-tags">
+          {tags.slice(0, 8).map((t) => {
+            const isActive = activeTags.includes(t.toLowerCase());
+            return (
+              <span
+                key={t}
+                className={`firm-tag ${isActive ? "firm-tag-active" : ""}`}
+              >
+                {t}
+              </span>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Botón Agregar abajo derecha */}
+      <div className="firm-card-footer">
+        <button onClick={handleAgregar}
+          type="button"
+          className="firm-add-btn"
+        >
+          Agregar +
+        </button>
+      </div>
+
+    </article>
+
   );
 };
 

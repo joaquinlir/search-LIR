@@ -77,6 +77,22 @@ app.get("/api/filters", (req, res) => {
     });
 });
 
+
+
+// 🔥 NUEVO ENDPOINT: devolver TODAS las firmas al frontend
+app.get("/api/all-firms", (req, res) => {
+    try {
+        // FIRMS viene directamente de Google Sheets (ya está cargado)
+        res.json(FIRMS);
+    } catch (err) {
+        console.error("Error en /api/all-firms:", err);
+        res.status(500).json({ error: "Error interno al obtener firmas" });
+    }
+});
+
+
+
+
 // Healthcheck simple
 app.get("/api/health", (req, res) => {
     res.json({ status: "ok", totalFirms: FIRMS.length });
@@ -149,6 +165,11 @@ app.get("/api/searchByTag", (req, res) => {
         results,
     });
 });
+
+
+
+
+
 
 const PORT = process.env.PORT || 4000;
 

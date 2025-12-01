@@ -31,6 +31,7 @@
   padding: 8px 0;
 }
 
+
 .search-input::placeholder {
   color: var(--text-muted);
 }
@@ -64,6 +65,37 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* 📌 NUEVO: Mensaje elegante de error */
+.search-error {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #e4375d;
+  background: #ffe8ee;
+  padding: 10px 14px;
+  border-radius: 10px;
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 4px 14px rgba(235, 75, 110, 0.15);
+  animation: fadeInUp 0.25s ease-out;
+}
+
+/* Animación suave */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -100,6 +132,10 @@
   .search-button {
     width: 100%;
     padding: 12px 20px;
+  }
+
+  .search-error {
+    font-size: 0.85rem;
   }
 }
 
