@@ -1,7 +1,7 @@
 // src/server.mjs
 import express from "express";
 import cors from "cors";
-import { loadFirmsFromSheet } from "./googleSheets.mjs";
+import { loadFirmsFromSheet, appendFormResponse } from "./googleSheets.mjs";
 import {
     buildFuseIndex,
     semanticSearch,
@@ -14,23 +14,32 @@ app.use(cors());
 app.use(express.json());
 
 let FIRMS = [];
+//let TAGS_CONCENTRADOS = [];   // ⬅️ NUEVO
 let FUSE = null;
 
 // Carga inicial del índice
 async function init() {
     console.log("📄 Cargando datos desde Google Sheets...");
+
+    // Cargar firmas
     FIRMS = await loadFirmsFromSheet();
     console.log(`   → ${FIRMS.length} filas cargadas.`);
 
+    // Cargar tags concentrados
+    // TAGS_CONCENTRADOS = await loadTagsConcentrados();   // ⬅️ NUEVO
+    // console.log(`   → Tags concentrados cargados: ${TAGS_CONCENTRADOS.length}`);
+
+    // Construir índice
     FUSE = buildFuseIndex(FIRMS);
     console.log("🔍 Índice Fuse.js construido.");
 
-    // Log mínimo para verificar que haya tags
     const firmasConTags = FIRMS.filter((f) => (f.tags || []).length > 0);
     console.log(
         `   → Firmas con al menos 1 tag: ${firmasConTags.length}`
     );
 }
+
+// =============================== ENDPOINTS ===============================
 
 // Obtener detalle de una firma por ID
 app.get("/api/firm-details", (req, res) => {
@@ -43,12 +52,25 @@ app.get("/api/firm-details", (req, res) => {
     return res.json(firm);
 });
 
+// =============================== NUEVO ENDPOINT ===============================
+// ✔ Devuelve el contenido de la hoja “tags concentrados”
+// app.get("/api/tags-concentrados", (req, res) => {
+//     try {
+//         res.json({
+//             count: TAGS_CONCENTRADOS.length,
+//             rows: TAGS_CONCENTRADOS,
+//         });
+//     } catch (error) {
+//         console.error("❌ Error en /api/tags-concentrados", error);
+//         res.status(500).json({ error: "Error interno" });
+// }
+// });
 
-// ✔ Filtros dinámicos: países y regiones reales desde la hoja
+// ✔ Filtros dinámicos
 app.get("/api/filters", (req, res) => {
     const countriesSet = new Set();
     const regionsSet = new Set();
-    const mappingSet = new Set(); // país:::región
+    const mappingSet = new Set();
 
     FIRMS.forEach((f) => {
         const country = (f.country || "").trim();
@@ -77,12 +99,9 @@ app.get("/api/filters", (req, res) => {
     });
 });
 
-
-
-// 🔥 NUEVO ENDPOINT: devolver TODAS las firmas al frontend
+// ✔ Todas las firmas
 app.get("/api/all-firms", (req, res) => {
     try {
-        // FIRMS viene directamente de Google Sheets (ya está cargado)
         res.json(FIRMS);
     } catch (err) {
         console.error("Error en /api/all-firms:", err);
@@ -90,16 +109,12 @@ app.get("/api/all-firms", (req, res) => {
     }
 });
 
-
-
-
-// Healthcheck simple
+// ✔ Health
 app.get("/api/health", (req, res) => {
     res.json({ status: "ok", totalFirms: FIRMS.length });
 });
 
-// Búsqueda semántica general
-// GET /api/search?q=texto
+// ✔ Búsqueda semántica
 app.get("/api/search", (req, res) => {
     const q = req.query.q || "";
     const limit = req.query.limit ? Number(req.query.limit) : 30;
@@ -122,10 +137,7 @@ app.get("/api/search", (req, res) => {
     });
 });
 
-// Tags rápidos
-// GET /api/tags
-// Tags rápidos filtrados por país / región si vienen en query
-// GET /api/tags?country=Chile&region=LATAM  (por ejemplo)
+// ✔ Tags rápidos
 app.get("/api/tags", (req, res) => {
     const { country, region } = req.query;
 
@@ -151,9 +163,7 @@ app.get("/api/tags", (req, res) => {
     });
 });
 
-
-// Buscar por tag concreto (para los "tags rápidos")
-// GET /api/searchByTag?tag=esg
+// ✔ Buscar por tag
 app.get("/api/searchByTag", (req, res) => {
     const tag = req.query.tag || "";
     if (!tag.trim()) return res.json({ tag, results: [] });
@@ -166,11 +176,34 @@ app.get("/api/searchByTag", (req, res) => {
     });
 });
 
+// 🔹 Endpoint para recibir el formulario y guardar en Google Sheets
+app.post("/api/form-submit", async (req, res) => {
+    try {
+        const payload = req.body || {};
+
+        // Asegurarnos de que savedFirms sea siempre un arreglo
+        const savedFirms = Array.isArray(payload.savedFirms)
+            ? payload.savedFirms
+            : [];
+
+        const dataToSave = {
+            ...payload,
+            savedFirms,
+        };
+
+        await appendFormResponse(dataToSave);
+
+        return res.json({ ok: true });
+    } catch (err) {
+        console.error("❌ Error en /api/form-submit:", err);
+        return res
+            .status(500)
+            .json({ ok: false, error: "Error al guardar en Google Sheets" });
+    }
+});
 
 
-
-
-
+// =============================== SERVIDOR ===============================
 const PORT = process.env.PORT || 4000;
 
 init()

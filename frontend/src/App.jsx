@@ -13,7 +13,11 @@ import AboutTool from "./pages/AboutTool/AboutTool.jsx";
 import Politics from "./pages/Politics/Politics.jsx";
 import Terms from "./pages/Terms/Terms.jsx";
 import AboutUs from "./pages/AboutUs/AboutUs.jsx";
+import GlobalConnectionForm from "./pages/Form/GlobalConnectionForm.jsx";
+import LocalConnectionForm from "./pages/Form/LocalConnectionForm.jsx";
+import FeeBenchmarkingForm from "./pages/Form/FeeBenchmarkingForm.jsx";
 
+import Forms from "./pages/Forms/Forms.jsx";
 import Home from "./pages/Home/Home.jsx";
 
 const App = () => {
@@ -32,6 +36,10 @@ const App = () => {
         <Route path="/privacy-policy" element={<Politics />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/about-us" element={<AboutUs />} />
+        <Route path="/form-global-connection" element={<GlobalConnectionForm />} />
+        <Route path="/form-local-connection" element={<LocalConnectionForm />} />
+        <Route path="/form-fee-benchmarking" element={<FeeBenchmarkingForm />} />
+        <Route path="/forms" element={<Forms />} />
 
         {/* 🔥 Ruta del detalle */}
         <Route path="/firm/:id" element={<FirmDetail />} />

@@ -241,9 +241,20 @@ const Header = () => {
                           )}
                         </div>
 
+                        {/* Áreas — solo una línea con “...” */}
                         {firm.area && (
-                          <p className="saved-firm-area">{firm.area}</p>
+                          <p className="saved-firm-area saved-firm-area-truncated">
+                            {firm.area}
+                          </p>
                         )}
+
+                        {/* País debajo */}
+                        {firm.country && (
+                          <p className="saved-firm-country">
+                            {firm.country}
+                          </p>
+                        )}
+
                       </div>
                       <button
                         type="button"
@@ -277,7 +288,7 @@ const Header = () => {
                   Ir al formulario
                 </button>
               ) : (
-                <Link to="/formulario" className="saved-modal-primary">
+                <Link to="/forms" className="saved-modal-primary">
                   Ir al formulario
                 </Link>
               )}

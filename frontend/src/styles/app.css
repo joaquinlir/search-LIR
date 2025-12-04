@@ -156,6 +156,7 @@
 
 .sidebar-card {
   background-color: #ffffff;
+  cursor: pointer;
   border-radius: 10px;
   padding: 16px;
   border: 1px solid var(--border-light);
@@ -213,7 +214,7 @@
 .results-grid {
   margin-top: 12px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
   gap: 16px;
 }
 
@@ -371,24 +372,6 @@
 }
 
 /* Cards de países / firmas en sidebar derecha */
-.country-sidebar-card-title {
-  margin: 0 0 4px;
-  font-size: 1.05rem;
-  color: var(--text-primary);
-}
-
-.country-sidebar-subtitle {
-  margin: 0 0 12px;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-}
-
-.country-cards-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
 .country-card {
   background-color: #ffffff;
   border-radius: 10px;
@@ -448,34 +431,268 @@
   color: var(--text-muted);
 }
 
-/* Layout responsivo */
-@media (min-width: 900px) {
-  .content-layout {
-    flex-direction: row;
-    gap: 28px;
+.return-btn {
+  background: none;
+  border: none;
+  color: #eb4b6e;
+  font-size: 15px;
+  cursor: pointer;
+  padding: 8px 0;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.return-btn:hover {
+  color: #a53850;
+}
+
+
+/* === MODAL DE CARGA PLATEADO + VERDE === */
+
+.search-loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 10, 15, 0.85);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* Contenedor con borde metálico animado */
+.search-loading-modal {
+  position: relative;
+  border-radius: 20px;
+  padding: 22px 26px;
+  max-width: 380px;
+  width: 90%;
+  color: #e5e5e5;
+  text-align: center;
+  overflow: hidden;
+}
+
+/* Borde metálico giratorio plateado + verde */
+.search-loading-modal::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+
+  background: conic-gradient(from 0deg,
+      #d9d9d9,
+      #3bb273,
+      #c0c0c0,
+      #2d9a63,
+      #a6a6a6,
+      #256f4a,
+      #d9d9d9);
+
+  animation: metallicGlow 4s linear infinite;
+  z-index: -2;
+}
+
+/* Fondo interior oscuro premium */
+.search-loading-modal::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: 18px;
+  background: linear-gradient(145deg, #0f172a, #1e293b);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.55);
+  z-index: -1;
+}
+
+@keyframes metallicGlow {
+  0% {
+    transform: rotate(0deg);
   }
 
-  .content-main-column {
-    flex: 1;
-  }
-
-  .sidebar-column {
-    flex: 0 0 280px;
-  }
-
-  .sidebar-card {
-    position: sticky;
-    top: 16px;
+  100% {
+    transform: rotate(360deg);
   }
 }
 
-@media (max-width: 900px) {
+/* === TEXTO CON DEGRADADO METÁLICO VERDE === */
+
+.search-loading-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+
+  background: linear-gradient(90deg,
+      #3bb273,
+      #d9d9d9,
+      #2d9a63,
+      #c0c0c0,
+      #3bb273);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: metallicText 4s ease-in-out infinite;
+}
+
+@keyframes metallicText {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.search-loading-subtitle {
+  font-size: 0.9rem;
+  color: #cbd5e1;
+  margin-bottom: 16px;
+}
+
+/* === BARRA DE CARGA METÁLICA === */
+
+.search-loading-bar-track {
+  position: relative;
+  width: 100%;
+  height: 9px;
+  border-radius: 999px;
+  background: #1f2937;
+  overflow: hidden;
+  margin-bottom: 10px;
+  border: 1px solid #3b3f47;
+}
+
+.search-loading-bar-fill {
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: linear-gradient(90deg,
+      #3bb273,
+      #d9d9d9,
+      #2d9a63,
+      #c0c0c0,
+      #3bb273);
+  background-size: 300% 100%;
+  border-radius: inherit;
+  animation: loadingBarMotion 1.2s ease-in-out infinite;
+}
+
+@keyframes loadingBarMotion {
+  0% {
+    transform: translateX(-100%);
+    background-position: 0% 50%;
+  }
+
+  50% {
+    transform: translateX(0%);
+    background-position: 50% 50%;
+  }
+
+  100% {
+    transform: translateX(100%);
+    background-position: 100% 50%;
+  }
+}
+
+.search-loading-hint {
+  font-size: 0.78rem;
+  color: #9ca3af;
+  margin-top: 6px;
+}
+
+
+
+/* Layout responsivo */
+@media (min-width: 900px) {
+  .content-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr 260px;
+    gap: 24px;
+    align-items: flex-start;
+  }
+
+  .sidebar-left,
+  .sidebar-right {
+    position: sticky;
+    top: 16px;
+  }
+
+  .content-main-column {
+    order: 0;
+  }
+}
+
+/* En pantallas pequeñas se apilan (izq → centro → dcha) */
+@media (max-width: 899px) {
+  .content-layout {
+    flex-direction: column;
+  }
+
   .sidebar-column {
+    flex: 0 0 auto;
     min-width: auto;
   }
 }
 
+/* Orden en pantallas pequeñas: primero resultados, luego tags, luego firmas por país */
+@media (max-width: 899px) {
+  .content-main-column {
+    order: 1;
+  }
+
+  .sidebar-left {
+    order: 2;
+  }
+
+  .sidebar-right {
+    order: 3;
+  }
+}
+
 /* Responsive */
+/* --- NUEVOS BREAKPOINTS --- */
+@media (max-width: 1200px) {
+  .content-layout {
+    gap: 20px;
+  }
+
+  .sidebar-column {
+    flex: 0 0 240px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .content-layout {
+    gap: 18px;
+  }
+
+  .sidebar-column {
+    flex: 0 0 230px;
+  }
+
+  .results-grid {
+    gap: 14px;
+  }
+}
+
+@media (max-width: 900px) {
+  .content-layout {
+    gap: 16px;
+  }
+
+  .sidebar-column {
+    flex: 0 0 220px;
+  }
+
+  .results-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+    gap: 14px;
+  }
+}
+
 @media (max-width: 768px) {
   .hero {
     padding: 60px 12px 40px;
@@ -489,14 +706,43 @@
     font-size: 0.95rem;
   }
 
+  .main-content {
+    padding: 0 12px 24px;
+    margin-top: -20px;
+    /* Ajuste menor */
+  }
+
+  .content-layout {
+    gap: 16px;
+  }
+
+  .filters-section {
+    padding: 12px 12px;
+  }
+
+  .filters-row {
+    flex-direction: column;
+  }
+
+  .filters-row select {
+    width: 100%;
+    min-width: 0;
+    /* Resetea el min-width anterior */
+  }
+
   .results-grid {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
     gap: 12px;
   }
 
   .sidebar-card {
     border-radius: 8px;
     padding: 14px;
+  }
+
+  .sidebar-column {
+    flex: 0 0 auto;
+    /* Asegura que se ajuste al contenido en móvil */
   }
 }
 
@@ -519,7 +765,20 @@
 
   .results-grid {
     grid-template-columns: 1fr;
+    /* Siempre 1 columna en móviles pequeños */
     gap: 12px;
+  }
+
+  .content-layout {
+    gap: 14px;
+  }
+
+  .sidebar-card {
+    padding: 12px;
+  }
+
+  .sidebar-card h3 {
+    font-size: 1rem;
   }
 }
 
@@ -535,67 +794,53 @@
   .main-content {
     padding: 0 12px 24px;
   }
-}
 
-/*nuevoooo sitio*/
-
-@media (min-width: 900px) {
   .content-layout {
-    display: grid;
-    grid-template-columns: 260px 1fr 260px;
-    gap: 20px;
-    align-items: flex-start;
+    gap: 12px;
   }
 
-  .sidebar-left,
-  .sidebar-right {
-    position: sticky;
-    top: 16px;
-  }
-
-  .content-main-column {
-    order: 0;
-  }
-}
-
-/* En pantallas pequeñas se apilan (izq → centro → dcha) */
-@media (max-width: 900px) {
-  .content-layout {
-    flex-direction: column;
-  }
-
-  .sidebar-column {
-    flex: 0 0 auto;
-    min-width: auto;
-  }
-}
-
-/* Orden en pantallas pequeñas: primero resultados, luego tags, luego firmas por país */
-@media (max-width: 900px) {
-  .content-main-column {
-    order: 1;
-  }
-
-  .sidebar-left {
-    order: 2;
-  }
-
-  .sidebar-right {
-    order: 3;
-  }
-}
-
-/* Responsive: que no se vean aplastados en pantallas pequeñas */
-@media (max-width: 768px) {
   .filters-section {
-    padding: 12px 12px;
+    padding: 10px 10px;
   }
 
-  .filters-row {
-    flex-direction: column;
+  .results-grid {
+    gap: 10px;
   }
 
-  .filters-row select {
-    width: 100%;
+  .results-header h2 {
+    font-size: 1rem;
+  }
+
+  .results-meta {
+    font-size: 0.75rem;
+  }
+}
+
+/* Ajuste global para tamaños de fuente */
+@media (max-width: 768px) {
+  html {
+    font-size: 15px;
+  }
+
+  h1 {
+    font-size: 1.875rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 14px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
   }
 }

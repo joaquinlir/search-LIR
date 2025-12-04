@@ -13,35 +13,30 @@ const credentials = JSON.parse(
 
 const auth = new google.auth.GoogleAuth({
     credentials,
-    scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+    scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+    // "https://www.googleapis.com/auth/drive.file" // solo si en el futuro quieres crear hojas, no hace falta ahora
 });
+
 
 const sheets = google.sheets({ version: "v4", auth });
 
-// ⚠️ Reemplaza por tu ID real si cambia
+// ID del spreadsheet
 const SPREADSHEET_ID = "1Slpn0UUmcr3pih1xuNdbKRhd7NYFY3UFR5qFzxsWQvE";
 
-/**
- * Normaliza texto: minúsculas + sin tildes.
- */
+/* ------------------------------- UTILIDADES ------------------------------- */
 export function normalize(str) {
     return String(str || "")
         .toLowerCase()
         .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "");
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim();
 }
 
-/**
- * Parser robusto de TAGS:
- * - Soporta cadenas tipo: banking, finance, etc
- * - Soporta: ["banking","finance"]
- * - Soporta: ['banking','finance']
- */
 function parseTags(tagsRaw) {
     const raw = String(tagsRaw || "").trim();
     if (!raw) return [];
 
-    // Intento 1: JSON array ["tag1","tag2"] o ['tag1','tag2']
+    // Intento 1: JSON array
     if (raw.startsWith("[") && raw.endsWith("]")) {
         try {
             const jsonSafe = raw.replace(/'/g, '"');
@@ -52,27 +47,40 @@ function parseTags(tagsRaw) {
                     .map((t) => t.replace(/^"+|"+$/g, "").trim())
                     .filter(Boolean);
             }
-        } catch (e) {
-            // fall back abajo
-        }
+        } catch (e) { }
     }
 
-    // Intento 2: texto plano separado por coma / punto y coma
-    const parts = raw
+    // Intento 2: texto separado por coma / ;
+    return raw
         .replace(/[\[\]]/g, "")
         .split(/[;,]/)
         .map((t) => t.replace(/^"+|"+$/g, "").trim())
         .filter(Boolean);
-
-    return parts;
 }
 
-/**
- * Lee la hoja Results3 y devuelve un arreglo de objetos:
- * { country, area, firm, description, testimonials, keyClients, workHighlights, ranked, tags, region }
- */
+function mergeTags(...lists) {
+    const seen = new Set();
+    const result = [];
+
+    lists
+        .flat()
+        .map((t) => String(t || "").trim())
+        .filter(Boolean)
+        .forEach((t) => {
+            const key = normalize(t);
+            if (seen.has(key)) return;
+            seen.add(key);
+            result.push(t);
+        });
+
+    return result;
+}
+
+
+/* ------------------------- LECTURA DE RESULTS3 ---------------------------- */
+/* ------------------------- LECTURA DE RESULTS3 ---------------------------- */
 export async function loadFirmsFromSheet() {
-    const range = "Results3!A2:K"; // A:PAIS ... I:TAGS, J:REGION
+    const range = "Results3!A2:K";
     const res = await sheets.spreadsheets.values.get({
         spreadsheetId: SPREADSHEET_ID,
         range,
@@ -80,50 +88,249 @@ export async function loadFirmsFromSheet() {
 
     const rows = res.data.values || [];
 
-    const firms = rows.map((row, index) => {
+    // 1) Cargamos tags desde "Tags Conceptos"
+    const tagsConceptosMap = await loadTagsConceptos();
+
+    // 2) Agrupamos Results3 por firma + país
+    const groups = new Map();
+
+    rows.forEach((row, index) => {
         const [
-            country = "",
-            area = "",
-            firm = "",
-            description = "",
-            testimonials = "",
-            keyClients = "",
-            workHighlights = "",
+            countryRaw = "",
+            areaRaw = "",
+            firmRaw = "",
+            descriptionRaw = "",
+            testimonialsRaw = "",
+            keyClientsRaw = "",
+            workHighlightsRaw = "",
             rankedRaw = "",
             tagsRaw = "",
             regionRaw = "",
-            idRaw = "", // J = REGION
+            idRaw = "",
         ] = row;
 
-        const ranked = Number(rankedRaw) || 0;
-        const tagsArr = parseTags(tagsRaw);
+        const country = String(countryRaw || "").trim();
+        const firm = String(firmRaw || "").trim();
+        if (!firm) return; // sin firma, descartamos
 
-        return {
-            id: idRaw ? String(idRaw).trim() : String(index),
-            country,
-            area,
-            firm,
-            description,
-            testimonials,
-            keyClients,
-            workHighlights,
-            ranked,
-            tags: tagsArr,
-            tagsText: tagsArr.join(" "),
-            region: regionRaw || "",
-        };
+        const key = `${normalize(country)}::${normalize(firm)}`;
+
+        if (!groups.has(key)) {
+            groups.set(key, {
+                id: idRaw ? String(idRaw).trim() : String(index),
+                firm,
+                country,
+                region: String(regionRaw || "").trim(),
+                rankedValues: [],
+                tagsFromResults3: [],
+                areasSet: new Set(),
+                descriptions: [],
+                testimonials: [],
+                keyClients: [],
+                workHighlights: [],
+            });
+        }
+
+        const g = groups.get(key);
+
+        const rankedNum = Number(rankedRaw);
+        if (Number.isFinite(rankedNum)) {
+            g.rankedValues.push(rankedNum);
+        }
+
+        const rowTags = parseTags(tagsRaw);
+        if (rowTags.length) {
+            g.tagsFromResults3.push(...rowTags);
+        }
+
+        if (areaRaw) {
+            g.areasSet.add(String(areaRaw).trim());
+        }
+        if (descriptionRaw) g.descriptions.push(String(descriptionRaw));
+        if (testimonialsRaw) g.testimonials.push(String(testimonialsRaw));
+        if (keyClientsRaw) g.keyClients.push(String(keyClientsRaw));
+        if (workHighlightsRaw) g.workHighlights.push(String(workHighlightsRaw));
     });
 
-    // Logs útiles para depurar
-    console.log("✅ loadFirmsFromSheet: filas cargadas:", firms.length);
-    if (firms.length > 0) {
-        console.log("   Ejemplo de firma[0]:", {
-            country: firms[0].country,
-            region: firms[0].region,
-            ranked: firms[0].ranked,
-            tags: firms[0].tags,
+    // 3) Construimos el arreglo final de firmas (una por firma+país)
+    const firms = [];
+
+    for (const [key, g] of groups.entries()) {
+        const validRanks = g.rankedValues.filter(
+            (n) => Number.isFinite(n) && n > 0
+        );
+        const bestRank = validRanks.length > 0 ? Math.min(...validRanks) : 0;
+
+        // Extra tags desde Tags Conceptos
+        const extraTags = tagsConceptosMap.get(key) || [];
+        const allTags = mergeTags(g.tagsFromResults3, extraTags);
+
+        const areas = Array.from(g.areasSet);
+        const areaCombined = areas.join(" | ");
+
+        // 🔥 CREAMOS el objeto firma ANTES del push
+        const firmObj = {
+            id: g.id,
+            country: g.country,
+            region: g.region,
+            firm: g.firm,
+            ranked: bestRank,
+            tags: allTags,
+            tagsText: allTags.join(" "),
+            tagsNormalized: allTags.map(t => normalize(t)),
+            area: areaCombined,
+            areas,
+            description: g.descriptions.join("\n\n").trim(),
+            testimonials: g.testimonials.join("\n\n").trim(),
+            keyClients: g.keyClients.join("\n\n").trim(),
+            workHighlights: g.workHighlights.join("\n\n").trim(),
+        };
+
+        // 🔥🔥 NORMALIZAMOS LOS TAGS AQUÍ
+        firmObj.tagsNormalized = (firmObj.tags || []).map((t) => normalize(t));
+
+        // Ahora sí lo agregamos
+        firms.push(firmObj);
+    }
+
+    console.log("✅ loadFirmsFromSheet (agrupado por firma):", firms.length);
+
+    return firms;
+
+}
+
+
+/* --------------------------------------------------------------------------
+   NUEVA FUNCIÓN: LEE LA HOJA "tags concentrados"
+   -------------------------------------------------------------------------- */
+
+/* --------------------------------------------------------------------------
+   NUEVA FUNCIÓN: LEE LA HOJA "Tags Conceptos"
+   A: PAÍS, B: ÁREA, C: FIRMA, D: TAGS
+   Devuelve un Map:
+   key = normalize(pais) + "::" + normalize(firma)
+   value = array de tags (pueden venir repetidos, se limpian luego con mergeTags)
+   -------------------------------------------------------------------------- */
+
+async function loadTagsConceptos() {
+    const range = "'Tags conceptos'!A2:D";
+    const res = await sheets.spreadsheets.values.get({
+        spreadsheetId: SPREADSHEET_ID,
+        range,
+    });
+
+    const rows = res.data.values || [];
+    console.log("📌 loadTagsConceptos: filas encontradas:", rows.length);
+
+    const map = new Map();
+
+    rows.forEach((row) => {
+        const [countryRaw = "", areaRaw = "", firmRaw = "", tagsRaw = ""] = row;
+
+        const country = String(countryRaw || "").trim();
+        const firm = String(firmRaw || "").trim();
+        if (!firm) return;
+
+        const key = `${normalize(country)}::${normalize(firm)}`;
+        const tagsArr = parseTags(tagsRaw);
+
+        if (!map.has(key)) {
+            map.set(key, []);
+        }
+        map.get(key).push(...tagsArr);
+    });
+
+    return map;
+}
+
+
+// al final de googleSheets.mjs
+// 👇 AL FINAL de googleSheets.mjs (o debajo de loadFirmsFromSheet)
+
+export async function appendFormResponse(formPayload) {
+    const sheetName = "formulariorespuestas";
+
+    // 1) Aplanamos los datos que queremos guardar
+    //    - createdAt: timestamp
+    //    - todo el form
+    //    - nombres y países de firmas guardadas
+    const savedFirms = Array.isArray(formPayload.savedFirms)
+        ? formPayload.savedFirms
+        : [];
+
+    const savedFirmNames = savedFirms
+        .map((f) => f.firm || f.name || "")
+        .filter(Boolean)
+        .join(" | ");
+
+    const savedFirmCountries = savedFirms
+        .map((f) => f.country || "")
+        .filter(Boolean)
+        .join(" | ");
+
+    // Armamos un objeto plano listo para hoja
+    const flat = {
+        createdAt: new Date().toISOString(),
+        ...formPayload,
+        savedFirmNames,
+        savedFirmCountries,
+    };
+
+    // 2) Leemos la fila 1 (encabezados actuales, si existen)
+    const headerRes = await sheets.spreadsheets.values.get({
+        spreadsheetId: SPREADSHEET_ID,
+        range: `${sheetName}!1:1`,
+    });
+
+    const existingHeaderRow = headerRes.data.values?.[0] || [];
+    let headers = [...existingHeaderRow];
+
+    // Si no hay encabezados, usamos todas las claves del objeto flat
+    if (headers.length === 0) {
+        headers = Object.keys(flat);
+    } else {
+        // Asegurar que todos los campos de flat estén en headers
+        for (const key of Object.keys(flat)) {
+            if (!headers.includes(key)) {
+                headers.push(key);
+            }
+        }
+    }
+
+    // 3) Si los encabezados cambiaron (nuevos campos), actualizar fila 1
+    if (
+        existingHeaderRow.length === 0 ||
+        existingHeaderRow.length !== headers.length ||
+        existingHeaderRow.some((h, i) => h !== headers[i])
+    ) {
+        await sheets.spreadsheets.values.update({
+            spreadsheetId: SPREADSHEET_ID,
+            range: `${sheetName}!1:1`,
+            valueInputOption: "RAW",
+            requestBody: {
+                values: [headers],
+            },
         });
     }
 
-    return firms;
+    // 4) Construir la fila de datos según el orden de headers
+    const row = headers.map((key) =>
+        flat[key] !== undefined && flat[key] !== null ? String(flat[key]) : ""
+    );
+
+    // 5) Agregar una nueva fila al final
+    await sheets.spreadsheets.values.append({
+        spreadsheetId: SPREADSHEET_ID,
+        range: `${sheetName}!A2:Z`,
+        valueInputOption: "USER_ENTERED",
+        insertDataOption: "INSERT_ROWS",
+        requestBody: {
+            values: [row],
+        },
+    });
+
+    console.log("📝 appendFormResponse: fila agregada en 'formulariorespuestas'");
 }
+
+
+
